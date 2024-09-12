@@ -1,21 +1,14 @@
 FROM debian:bullseye
 
-RUN apt-get update -y \
-&& apt-get upgrade -y \
-&& apt-get -y install nginx openssl 
-
+RUN apt update -y && apt upgrade -y
+RUN apt -y install nginx
 RUN mkdir -p /etc/nginx/ssl
-
-RUN openssl req -x509 -nodes \
-    -keyout /etc/nginx/ssl/nginx.key \
-    -out /etc/nginx/ssl/nginx.crt \
-	-subj "/C=FR/ST=IDF/L=Angouleme/O=42/OU=42/CN=mafissie.42.fr/UID=mafissie"
-
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
-
-RUN chmod 755 /var/www/html 
-RUN chown -R www-data:www-data /var/www/html
+RUN apt install openssl -y
+RUN mkdir -p /var/www/wordpress
+RUN chown -R www-data:www-data /var/www/wordpress
+COPY tools/script.sh /usr/local/bin/script.sh
+COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 443
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["bash", "/usr/local/bin/script.sh"]
